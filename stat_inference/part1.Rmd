@@ -1,0 +1,45 @@
+---
+title: "Statistical Inference Project Part 1"
+output: pdf_document
+---
+
+First I simulated 1000 averages of 40 expeonetials with lambda = 0.2. 
+```{r}
+lambda <- 0.2
+sim <- replicate(1000,(mean(rexp(40,rate=lambda))))
+```
+
+1. Show where the distribution is centered at and compare it to the theoretical center of the distribution. 
+
+We know that theoretical mean is 1/lambda. I calculated the mean of my simulated data and it is very close to the theoretical mean.
+```{r}
+theoretical.mean <- 1/lambda
+sim.mean <- mean(sim)
+```
+
+2. Show how variable it is and compare it to the theoretical variance of the distribution.
+
+We know the standard deviation for a distrubation of means is S/sqrt(n). So the standard deviation is (1/lambda)/sqrt(40). The variance is just the standard deviation squared. I calculated the variance of my simulated data and it is very close to the theoretical variance.
+```{r}
+theoretical.sd <- (1/lambda)/sqrt(40)
+theoretical.var <- theoretical.sd^2
+sim.var <- var(sim)
+
+```
+
+3. Show that the distribution is approximately normal.
+
+I first created a histogram of my simulated data. It appeared symetrical, centered around the mean of 5, and roughly normal. To show this more conclusively, I created a qqplot which compares a distribution (in this case my simulated data) the normal distribution. A perfectly normal distrubation should lie on the line. This shows that my data is very close to a normal distribution. 
+```{r, echo=FALSE}
+hist(sim)
+qqnorm(sim)
+qqline(sim)
+```
+
+4. Evaluate the coverage of the confidence interval for 1/lambda. (This only needs to be done for the specific value of lambda).
+
+I first created the 95% confidence interval. I then checked to see how many of my means of 40 exponentials fell within this interval. I found that approximately 95% of the means fell within this interval. 
+```{r}
+conf.interval <- theoretical.mean + c(-1,1)*1.96*theoretical.sd
+mean(conf.interval[1] < sim & sim < conf.interval[2])
+```
