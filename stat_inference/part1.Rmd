@@ -1,6 +1,8 @@
 ---
 title: "Statistical Inference Project Part 1"
-output: pdf_document
+output:
+  pdf_document:
+    fig_height: 4
 ---
 
 First I simulated 1000 averages of 40 expeonetials with lambda = 0.2. 
@@ -14,7 +16,9 @@ sim <- replicate(1000,(mean(rexp(40,rate=lambda))))
 We know that theoretical mean is 1/lambda. I calculated the mean of my simulated data and it is very close to the theoretical mean.
 ```{r}
 theoretical.mean <- 1/lambda
+theoretical.mean
 sim.mean <- mean(sim)
+sim.mean
 ```
 
 2. Show how variable it is and compare it to the theoretical variance of the distribution.
@@ -23,15 +27,22 @@ We know the standard deviation for a distrubation of means is S/sqrt(n). So the 
 ```{r}
 theoretical.sd <- (1/lambda)/sqrt(40)
 theoretical.var <- theoretical.sd^2
+theoretical.var
 sim.var <- var(sim)
+sim.var
 
 ```
 
 3. Show that the distribution is approximately normal.
 
-I first created a histogram of my simulated data. It appeared symetrical, centered around the mean of 5, and roughly normal. To show this more conclusively, I created a qqplot which compares a distribution (in this case my simulated data) the normal distribution. A perfectly normal distrubation should lie on the line. This shows that my data is very close to a normal distribution. 
+I first created a histogram of my simulated data. It appeared symetrical, centered around the mean of 5, and roughly normal. To show this more conclusively, I created a qqplot which compares a distribution (in this case my simulated data) to the normal distribution. A perfectly normal distribution should lie on the line. This shows that my data is very close to a normal distribution. 
+
 ```{r, echo=FALSE}
 hist(sim)
+```
+
+
+```{r, echo=FALSE}
 qqnorm(sim)
 qqline(sim)
 ```

@@ -1,23 +1,22 @@
 ---
 title: "Statistical Inference Project Part 2"
-output: pdf_document
+geometry: margin=0.2in
+fontsize: 22pt
+output:
+  pdf_document:
+    fig_height: 4
+
 ---
-1. Load the ToothGrowth data and perform some basic exploratory data analyses.
+1. Looking at the tooth lengths for each treatment condition and dose we can see several things. First, a higher dose of Vitamin C results in longer teeth. Second, for 0.5 mg and 1 mg orange juice results in longer teeth on average than ascorbic acid. However, for 2 mg the average tooth length appears roughly equal between orange juice and ascorbic acid treatments.
 ```{r}
 data(ToothGrowth)
 tg <- ToothGrowth
 tg$dose <- as.factor(tg$dose)
-boxplot(len~interaction(supp,dose),data=tg,ylab="Tooth Length",
-        names=c("OJ 0.5mg","AA 0.5mg","OJ 1mg","AA 1mg","AA 2mg","AA 2mg"),
-        main="Tooth length by treatment and dose",col=c("orange", "yellow"),
-        cex.axis=.6, cex.main=.75, cex.lab=.75)
-legend(0.5, 34, c("Orange juice (OJ)", "Ascorbic acid (AA)"),
-       fill = c("orange", "yellow"))
+boxplot(len~interaction(supp,dose),data=tg,ylab="Tooth Length", names=c("OJ 0.5mg","AA 0.5mg","OJ 1mg","AA 1mg","AA 2mg","AA 2mg"), main="Tooth length by treatment and dose",col=c("orange", "yellow"), cex.axis=.6, cex.main=.75, cex.lab=.75)
+legend(0.5, 34, c("Orange juice (OJ)", "Ascorbic acid (AA)"),fill = c("orange", "yellow"))
 ```
 
-Looking at the tooth lengths for each treatment condition and dose we can see several things. First, a higher dose of Vitamin C results in longer teeth. Second, for 0.5 mg and 1 mg orange juice results in longer teeth on average than ascorbic acid. However, for 2 mg the average tooth length appears roughly equal between orange juice and ascorbic acid treatments.
-
-2. Provide a basic summary of the data.
+2. Consistent with the boxplots from part 1, the mean tooth length for the 0.5 mg and 1 mg doses of orange juice are higher than for those same doses of ascorbic acid. However, the mean tooth length for 2 mg of orange juice or ascorbic acid are similar. The variance in the data matches what we see in the boxplots in part 1. 0.5 mg and 1 mg of orange juice have a higher standard deviation for tooth length than the corresponding ascorbic acid treatments. However, 2 mg of ascorbic acid has a higher standard deviation for tooth length than the corresponding dose of orange juice.
 ```{r,message=F, warning=F}
 library(dplyr)
 ```
@@ -25,7 +24,37 @@ library(dplyr)
 tg.grouped <- group_by(tg,supp,dose)
 summarise(tg.grouped, mean(len), sd(len))
 ```
-Consistent with the boxplots from part 1 we see that the mean tooth length for the 0.5 mg and 1 mg doses of orange juice are higher than for those same doses of ascorbic acid. Additionally, we see that the mean tooth length for 2 mg of orange juice or ascorbic acid are very similar. We also see that the variance in the data matches what we see in the boxplots in part 1. 0.5 mg and 1 mg of orange juice have a higher standard deviation for tooth length than the corresponding ascorbic acid treatments. However, 2 mg of ascorbic acid has a higher standard deviation for tooth length than the corresponding dose of orange juice.
+3. I first want to use a t test to compare whether different doses significantly change mean tooth length.
+```{r}
+rbind(t.test(tg[tg$dose==0.5, "len"], tg[tg$dose==1, "len"])$conf, 
+   t.test(tg[tg$dose==0.5, "len"], tg[tg$dose==2, "len"])$conf,
+   t.test(tg[tg$dose==1, "len"], tg[tg$dose==2, "len"])$conf)
+rbind(t.test(tg[tg$dose==0.5, "len"], tg[tg$dose==1, "len"])$p.value,
+   t.test(tg[tg$dose==0.5, "len"], tg[tg$dose==2, "len"])$p.value,
+   t.test(tg[tg$dose==1, "len"], tg[tg$dose==2, "len"])$p.value)
+```
+I next want to use a t test to compare whether different supplments significantly change mean tooth length.
+```{r}
+t.test(tg[tg$supp=="OJ", "len"], tg[tg$supp=="VC", "len"])$conf
+t.test(tg[tg$supp=="OJ", "len"], tg[tg$supp=="VC", "len"])$p.value
+```
+I then want to use a t test to compare for a given dose, whether different supplments significantly change mean tooth length.
+```{r}
+rbind(t.test(tg[tg$supp=="OJ" & tg$dose==0.5, "len"], tg[tg$supp=="VC" & tg$dose==0.5, "len"])$conf,
+   t.test(tg[tg$supp=="OJ" & tg$dose==1, "len"], tg[tg$supp=="VC" & tg$dose==1, "len"])$conf,
+   t.test(tg[tg$supp=="OJ" & tg$dose==2, "len"], tg[tg$supp=="VC" & tg$dose==2, "len"])$conf)
+rbind(t.test(tg[tg$supp=="OJ" & tg$dose==0.5, "len"], tg[tg$supp=="VC" & tg$dose==0.5, "len"])$p.value,
+   t.test(tg[tg$supp=="OJ" & tg$dose==1, "len"], tg[tg$supp=="VC" & tg$dose==1, "len"])$p.value,
+   t.test(tg[tg$supp=="OJ" & tg$dose==2, "len"], tg[tg$supp=="VC" & tg$dose==2, "len"])$p.value)
+```
+4. Conclusions:
+* Disregarding the supplement types, higher doses of vitamin c result in longer mean tooth lenghts. I conclude this because the first 3 t tests in part 3 show the 95% confidence interval does not contain 0 and the p value is less than 0.05, so I reject the null hypothesis that there is no difference in mean length.
+* Disregarding the doses, there is no difference between ascorbic acid and orange juice because the 95% confidence interval contains 0 and the p value is greater than 0.05, so I do not reject the null hypothesis.
+* There is only a significant difference between ascorbic acid and orange juice for 1 mg, because this is the only comparison where the confidence interval does not contain 0 and the p value is less than 0.05
 
-3. t tests between these conditions. Need to do.
-4. Assumptions that we make. Don't think it's paired, but the dataset description is confusing. Probably equal variance?
+I am making the following assumptions:
+
+* there is not much difference between guina pigs in the different groups except for supplement and dose given.
+* that the data is normally distribitated.
+* that the data is not paired because it is different guina pigs that receive the different supplments and doses.
+* that the variance is not equal between groups based on the boxplots and standard deviations for the different supplments and doses.
